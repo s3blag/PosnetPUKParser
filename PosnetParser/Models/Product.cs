@@ -40,6 +40,10 @@
             Notebook = notebook;
         }
 
+        protected Product()
+        {
+        }
+
         public int Number { get; }
         public string Name { get; }
         public string Barcode { get; }

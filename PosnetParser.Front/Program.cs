@@ -28,7 +28,12 @@ namespace PosnetParser.Front
                 _dbLines = await GetDbLinesFromFileAsync();
             }
 
-            _productsDatabase = DeserializePUKDatabaseAsync();
+            _productsDatabase = await DeserializePUKDatabaseAsync();
+
+            if (_productsDatabase.HasErrors)
+            {
+                WriteWarnings();
+            }
 
             WriteAvailableParsersMessage();
 
@@ -37,13 +42,13 @@ namespace PosnetParser.Front
                 _chosenParser = GetChosenParser(ReadConsoleLine());
             }
 
-            _parsedData = ParseDatabase();
+            _parsedData = await ParseDatabaseAsync();
 
             while (!_isTargetPathValid)
             {
                 WriteSpecifyTargetPathMessage();
                 _targetPath = ReadConsoleLine();
-                _isTargetPathValid = await WriteParsedDbToFile(_targetPath);
+                _isTargetPathValid = await WriteParsedDbToFileAsync(_targetPath);
             }
 
             WriteFinalMessage();
@@ -54,6 +59,16 @@ namespace PosnetParser.Front
         {
             WriteLineToConsole("Operacja zakończona pomyślnie.");
             WriteLineToConsole("Kliknij dowolny przycisk by zakończyć działanie programu.");
+        }
+
+        private static void WriteWarnings()
+        {
+            WriteLineToConsole("Podczas wczytywania bazy z pliku wystąpiły błędy dla następujących pozycji: ", ConsoleColor.DarkYellow);
+            foreach (var warning in _productsDatabase.Warnings)
+            {
+                WriteLineToConsole(warning.ToString(), ConsoleColor.Yellow);
+            }
+
         }
 
         private static void WriteHelloMessage()
@@ -77,12 +92,6 @@ namespace PosnetParser.Front
             WriteLineToConsole("Dokonaj wyboru podając nr usługi: ");
         }
 
-        private static void WriteLineToConsole(string message) => Console.WriteLine(message);
-
-        private static string ReadConsoleLine() => Console.ReadLine();
-
-        private static char GetKeyPress() => Console.ReadKey().KeyChar;
-
         private static IParser GetChosenParser(string option)
         {
             try
@@ -97,48 +106,35 @@ namespace PosnetParser.Front
                         throw new Exception("Nieprawidłowy wybór. Dokonaj wyboru ponownie:");
                 }
             }
-            catch ( Exception ex)
+            catch (Exception ex)
             {
                 if (ex is FormatException || ex is OverflowException)
                 {
-                    WriteLineToConsole("Nieprawidłowy format. Podaj wartość ponownie:");
+                    WriteLineToConsole("Nieprawidłowy format. Podaj wartość ponownie:", ConsoleColor.Red);
                 }
                 else
                 {
-                    WriteLineToConsole(ex.Message);
+                    WriteLineToConsole(ex.Message, ConsoleColor.Red);
                 }
 
                 return null;
             }
         }
 
-        private static string WriteParsedData()
+        private static async Task<string> ParseDatabaseAsync()
         {
             try
             {
-                return _chosenParser.Parse(_productsDatabase);
+                return await Task.Run(() => _chosenParser.Parse(_productsDatabase));
             }
             catch (Exception ex)
             {
-                WriteLineToConsole(ex.Message);
+                WriteLineToConsole(ex.Message, ConsoleColor.Red);
                 return string.Empty;
             }
         }
 
-        private static string ParseDatabase()
-        {
-            try
-            {
-                return _chosenParser.Parse(_productsDatabase);
-            }
-            catch (Exception ex)
-            {
-                WriteLineToConsole(ex.Message);
-                return string.Empty;
-            }
-        }
-
-        private static async Task<bool> WriteParsedDbToFile(string targetPath)
+        private static async Task<bool> WriteParsedDbToFileAsync(string targetPath)
         {
             try
             {
@@ -147,7 +143,7 @@ namespace PosnetParser.Front
             }
             catch (Exception ex)
             {
-                WriteLineToConsole(ex.Message);
+                WriteLineToConsole(ex.Message, ConsoleColor.Red);
                 return false;
             }
         }
@@ -160,26 +156,36 @@ namespace PosnetParser.Front
             }
             catch (Exception ex)
             {
-                WriteLineToConsole(ex.Message);
+                WriteLineToConsole(ex.Message, ConsoleColor.Red);
 
                 return Array.Empty<string>();
             }
         }
 
-        private static PosnetProductsDatabase DeserializePUKDatabaseAsync()
+        private static async Task<PosnetProductsDatabase> DeserializePUKDatabaseAsync()
         {
             try
             {
                 var dbDeserializator = new PUKDatabaseDeserializator();
 
-                return dbDeserializator.Deserialize(_dbLines);
+                return await Task.Run(() => dbDeserializator.Deserialize(_dbLines));
             }
             catch (Exception ex)
             {
-                WriteLineToConsole(ex.Message);
+                WriteLineToConsole(ex.Message, ConsoleColor.Red);
 
                 return PosnetProductsDatabase.Empty;
             }
         }
+
+        private static void WriteLineToConsole(string message, ConsoleColor color = ConsoleColor.White)
+        {
+            Console.WriteLine(message);
+        }
+
+        private static string ReadConsoleLine() => Console.ReadLine();
+
+        private static char GetKeyPress() => Console.ReadKey().KeyChar;
+
     }
 }

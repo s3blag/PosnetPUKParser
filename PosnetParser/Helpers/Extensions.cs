@@ -1,11 +1,18 @@
 ﻿using PosnetParser.Enums;
 using System;
+using System.Text;
 
 namespace PosnetParser.Helpers
 {
-    public class EnumValuesProvider
+    public static class Extensions
     {
-        public string GetCsvSeparatorValue(CsvSeparator csvSeparator)
+        public static void AppendField(this StringBuilder stringBuilder, string separator, string fieldValue)
+        {
+            stringBuilder.Append(fieldValue);
+            stringBuilder.Append(separator);
+        }
+
+        public static string GetEnumValue(this CsvSeparator csvSeparator)
         {
             switch (csvSeparator)
             {

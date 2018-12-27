@@ -5,7 +5,7 @@ namespace PosnetParser.Models
 {
     public class PosnetProductsDatabase
     {
-        public PosnetProductsDatabase(string cashRegisterModel, ICollection<Product> products)
+        public PosnetProductsDatabase(string cashRegisterModel, ICollection<ProductWithMetadata> products, ICollection<Warning> warnings)
         {
             if (!products.Any())
             {
@@ -15,6 +15,7 @@ namespace PosnetParser.Models
             {
                 CashRegisterModel = cashRegisterModel;
                 Products = (IReadOnlyCollection<Product>)products;
+                Warnings = (IReadOnlyCollection<Warning>) warnings;
                 IsEmpty = false;
             }
         }
@@ -28,7 +29,11 @@ namespace PosnetParser.Models
 
         public IReadOnlyCollection<Product> Products { get; }
 
+        public IReadOnlyCollection<Warning> Warnings { get; }
+
         public int Count => Products.Count;
+
+        public bool HasErrors => Warnings.Any();
 
         public bool IsEmpty { get; }
 

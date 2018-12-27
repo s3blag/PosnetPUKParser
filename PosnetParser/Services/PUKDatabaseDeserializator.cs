@@ -2,6 +2,7 @@
 using PosnetParser.Interfaces;
 using PosnetParser.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,10 +13,12 @@ namespace PosnetParser.Services
     {
         private readonly string _separator;
         private readonly int _numberOfPropertiesInProductClass;
+        private readonly List<ProductWithMetadata> _products = new List<ProductWithMetadata>();
+        private readonly List<Warning> _warnings = new List<Warning>();
 
         public PUKDatabaseDeserializator()
         {
-            _separator = new EnumValuesProvider().GetCsvSeparatorValue(Enums.CsvSeparator.Tabulation);
+            _separator = Enums.CsvSeparator.Tabulation.GetEnumValue();
             _numberOfPropertiesInProductClass = typeof(Product).GetProperties().Count();
         }
 
@@ -23,15 +26,25 @@ namespace PosnetParser.Services
         {
             var deviceInfo = ReadDeviceMetadata(dbFileLines);
 
-            var products = new List<Product>(dbFileLines.Count()-2);
+            //remove unused tables
+            _products.Clear();
+            _warnings.Clear();
 
-            //TODO
-            Parallel.ForEach(dbFileLines.Skip(3).Take(4098), productDbLine =>
+            foreach (var productDbLine in dbFileLines.Skip(3).Take(4098))
             {
-                products.Add(CreateProductFromLine(productDbLine));
-            });
+                var product = CreateProductFromLine(productDbLine);
 
-            return new PosnetProductsDatabase(deviceInfo, products);
+                if (product.IsValid)
+                {
+                    _products.Add(product);
+                }
+                else
+                {
+                    _warnings.Add(new Warning(productDbLine, 0));
+                }
+            }
+
+            return new PosnetProductsDatabase(deviceInfo, _products, _warnings);
         }
 
         private string ReadDeviceMetadata(string[] serializedDatabase)
@@ -46,17 +59,17 @@ namespace PosnetParser.Services
             return "";
         }
 
-        private Product CreateProductFromLine(string csvLine)
+        private ProductWithMetadata CreateProductFromLine(string csvLine)
         {
             var productValues = csvLine.Split(_separator);
 
-            if (productValues.Count()-1 != _numberOfPropertiesInProductClass)
+            if (productValues.Length-1 != _numberOfPropertiesInProductClass)
             {
-                ThrowInvalidFileException();
+                return ProductWithMetadata.NotValid;
             }
 
             return
-                new Product(
+                new ProductWithMetadata(
                     Convert.ToInt32(productValues[0]),
                     productValues[1],
                     productValues[2],

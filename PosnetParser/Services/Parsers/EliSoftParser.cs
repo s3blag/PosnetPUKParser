@@ -4,7 +4,6 @@ using PosnetParser.Interfaces;
 using PosnetParser.Models;
 using System;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PosnetParser.Services
 {
@@ -16,7 +15,7 @@ namespace PosnetParser.Services
         public EliSoftParser()
         {
             _parsedDataSB = new StringBuilder();
-            _separator = new EnumValuesProvider().GetCsvSeparatorValue(CsvSeparator.Tabulation);
+            _separator = CsvSeparator.Tabulation.GetEnumValue();
         }
 
         public string Parse(PosnetProductsDatabase posnetProductsDatabase)
@@ -36,10 +35,10 @@ namespace PosnetParser.Services
 
         private void AddProducts(PosnetProductsDatabase posnetProductsDatabase)
         {
-            Parallel.ForEach(posnetProductsDatabase.Products, product =>
+            foreach (var product in posnetProductsDatabase.Products)
             {
                 AddLine(GetLine(product));
-            });
+            }
         }
 
         private string GetParsedData() => _parsedDataSB.ToString();
@@ -81,11 +80,11 @@ namespace PosnetParser.Services
             switch (VATtype)
             {
                 case 0:
-                    return "23%";
+                    return "23";
                 case 1:
-                    return "8%";
+                    return "8";
                 case 3:
-                    return "5%";
+                    return "5";
                 default:
                     throw new Exception("Invalid Vat type number.");
             }
