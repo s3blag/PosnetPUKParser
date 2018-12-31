@@ -12,7 +12,7 @@ namespace PosnetParser.Helpers
             stringBuilder.Append(separator);
         }
 
-        public static string GetEnumValue(this CsvSeparator csvSeparator)
+        public static string GetCorrespondingEnumValue(this CsvSeparator csvSeparator)
         {
             switch (csvSeparator)
             {

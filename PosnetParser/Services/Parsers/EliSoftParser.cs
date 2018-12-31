@@ -15,7 +15,7 @@ namespace PosnetParser.Services
         public EliSoftParser()
         {
             _parsedDataSB = new StringBuilder();
-            _separator = CsvSeparator.Tabulation.GetEnumValue();
+            _separator = CsvSeparator.Tabulation.GetCorrespondingEnumValue();
         }
 
         public string Parse(PosnetProductsDatabase posnetProductsDatabase)

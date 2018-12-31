@@ -12,7 +12,7 @@ namespace PosnetParser.Front
         private static string _sourcePath = string.Empty;
         private static string _targetPath = string.Empty;
         private static bool _isTargetPathValid = false;
-        private static string[] _dbLines = Array.Empty<string>();
+        private static string _db;
         private static PosnetProductsDatabase _productsDatabase;
         private static IParser _chosenParser;
         private static string _parsedData;
@@ -22,10 +22,10 @@ namespace PosnetParser.Front
         {
             WriteHelloMessage();
 
-            while (!_dbLines.Any())
+            while (string.IsNullOrEmpty(_db))
             {
                 _sourcePath = ReadConsoleLine();
-                _dbLines = await GetDbLinesFromFileAsync();
+                _db = await LoadDbFromFile();
             }
 
             _productsDatabase = await DeserializePUKDatabaseAsync();
@@ -68,7 +68,7 @@ namespace PosnetParser.Front
             {
                 WriteLineToConsole(warning.ToString(), ConsoleColor.Yellow);
             }
-
+             
         }
 
         private static void WriteHelloMessage()
@@ -148,17 +148,17 @@ namespace PosnetParser.Front
             }
         }
 
-        private static async Task<string[]> GetDbLinesFromFileAsync()
+        private static async Task<string> LoadDbFromFile()
         {
             try
             {
-                return await _fileService.ReadFileLinesAsync(_sourcePath);
+                return await _fileService.ReadFileAsync(_sourcePath);
             }
             catch (Exception ex)
             {
                 WriteLineToConsole(ex.Message, ConsoleColor.Red);
 
-                return Array.Empty<string>();
+                return string.Empty;
             }
         }
 
@@ -166,9 +166,9 @@ namespace PosnetParser.Front
         {
             try
             {
-                var dbDeserializator = new PUKDatabaseDeserializator();
+                var dbDeserializator = new PUKDatabaseDeserializer();
 
-                return await Task.Run(() => dbDeserializator.Deserialize(_dbLines));
+                return await Task.Run(() => dbDeserializator.Deserialize(_db));
             }
             catch (Exception ex)
             {

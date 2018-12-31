@@ -2,7 +2,7 @@
 {
     public class Product
     {
-        public Product(
+        protected Product(
             int number,
             string name,
             string barcode,

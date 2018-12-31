@@ -8,7 +8,7 @@ namespace PosnetParser.Services
 {
     public class FileService : IFileService
     {
-        public async Task<string[]> ReadFileLinesAsync(string path)
+        public async Task<string> ReadFileAsync(string path)
         {
             var fileExists = File.Exists(path);
 
@@ -17,14 +17,14 @@ namespace PosnetParser.Services
                 throw new Exception("Specified file doesn't exist.");
             }
 
-            var fileLines = await File.ReadAllLinesAsync(path);
+            var fileText = await File.ReadAllTextAsync(path);
 
-            if (fileLines.Count() < 4)
+            if (string.IsNullOrEmpty(fileText))
             {
                 throw new Exception("Specified file doesn't have any data.");
             }
 
-            return fileLines;
+            return fileText;
         }
 
         public async Task SaveFileAsync(string path, string content)

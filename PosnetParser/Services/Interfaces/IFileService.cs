@@ -4,7 +4,7 @@ namespace PosnetParser.Interfaces
 {
     public interface IFileService
     {
-        Task<string[]> ReadFileLinesAsync(string path);
+        Task<string> ReadFileAsync(string path);
         Task SaveFileAsync(string path, string content);
     }
 }

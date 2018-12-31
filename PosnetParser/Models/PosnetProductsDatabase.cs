@@ -5,9 +5,14 @@ namespace PosnetParser.Models
 {
     public class PosnetProductsDatabase
     {
-        public PosnetProductsDatabase(string cashRegisterModel, ICollection<ProductWithMetadata> products, ICollection<Warning> warnings)
+        public PosnetProductsDatabase(
+            string cashRegisterModel, 
+            ICollection<ProductWithMetadata> products,
+            ICollection<EanWithMetadata> eans,
+            ICollection<SetWithMetadata> sets,
+            ICollection<Warning> warnings)
         {
-            if (!products.Any())
+            if (!products.Any() && !eans.Any() && !sets.Any())
             {
                 IsEmpty = true;
             }
@@ -15,6 +20,8 @@ namespace PosnetParser.Models
             {
                 CashRegisterModel = cashRegisterModel;
                 Products = (IReadOnlyCollection<Product>)products;
+                Sets = (IReadOnlyCollection<Set>)sets;
+                Eans = (IReadOnlyCollection<Ean>)eans;
                 Warnings = (IReadOnlyCollection<Warning>) warnings;
                 IsEmpty = false;
             }
@@ -28,6 +35,10 @@ namespace PosnetParser.Models
         public string CashRegisterModel { get; }
 
         public IReadOnlyCollection<Product> Products { get; }
+
+        public IReadOnlyCollection<Ean> Eans { get; set; }
+
+        public IReadOnlyCollection<Set> Sets { get; set; }
 
         public IReadOnlyCollection<Warning> Warnings { get; }
 
