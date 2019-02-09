@@ -38,6 +38,7 @@
             Amount = amount;
             LinkedPLU = linkedPLU;
             Notebook = notebook;
+            VATNumber = vatNumber;
         }
 
         protected Product()
