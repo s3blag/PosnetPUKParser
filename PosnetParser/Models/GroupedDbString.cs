@@ -14,7 +14,7 @@ namespace PosnetParser.Models
 
             if (!match.Success)
             {
-                throw new Exception();
+                throw new Exception("PUK db file structure is not valid!");
             }
 
             Device = match.Groups[RegexGroupNames.DeviceName].Value;
