@@ -29,9 +29,7 @@ namespace PosnetParser.Services
 
         public async Task SaveFileAsync(string path, string content)
         {
-            var fileExists = File.Exists(path);
-
-            if (fileExists)
+            if (File.Exists(path))
             {
                 throw new Exception("Specified file already exists.");
             }
